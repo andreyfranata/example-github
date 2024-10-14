@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Streaming Player</title>
+  <title>Indonesia vs China</title>
+  <link rel="icon" href="Flag_of_Indonesia.svg.webp" type="image/webp"> <!-- Favicon -->
 
   <style>
     body {
@@ -35,12 +36,36 @@
     .button:hover {
       background-color: #45a049;
     }
+    .match-info {
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .flag {
+      width: 30px; /* Adjust the size of the flag */
+      margin: 0 8px; /* Space between the flag and text */
+      vertical-align: middle; /* Aligns the flag vertically with the text */
+    }
+    
+    /* Hide Histats Tracking Code */
+    .hidden-histats {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
   <div class="video-container">
     <video id="live-stream" controls></video>
+  </div>
+
+  <div class="match-info">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Flag_of_Indonesia.svg/1280px-Flag_of_Indonesia.svg.png" alt="Indonesia Flag" class="flag">
+    INDONESIA VS CHINA
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/450px-Flag_of_the_People%27s_Republic_of_China.svg.png" alt="China Flag" class="flag">
   </div>
 
   <div class="buttons">
@@ -74,6 +99,21 @@
     // Default to CH 01
     changeVideo('https://bf.shandongjncz.com/live/sd-1-4229108.m3u8?txSecret=eb2d5e24cc78f1fbaac245826faf4a8a&txTime=670cbcfa');
   </script>
+
+  <!-- Histats.com  START  (aync)-->
+  <div class="hidden-histats">
+    <script type="text/javascript">var _Hasync= _Hasync|| [];
+    _Hasync.push(['Histats.start', '1,4902990,4,0,0,0,00010000']);
+    _Hasync.push(['Histats.fasi', '1']);
+    _Hasync.push(['Histats.track_hits', '']);
+    (function() {
+      var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
+      hs.src = ('//s10.histats.com/js15_as.js');
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+    })();</script>
+    <noscript><a href="/" target="_blank"><img  src="//sstatic1.histats.com/0.gif?4902990&101" alt="" border="0"></a></noscript>
+  </div>
+  <!-- Histats.com  END  -->
 
 </body>
 </html>
