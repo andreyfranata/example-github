@@ -12,6 +12,9 @@
       background-color: #f0f0f0;
       font-family: Arial, sans-serif;
     }
+    h1 {
+      margin-top: 20px;
+    }
     .video-container {
       max-width: 800px;
       margin: 20px auto;
@@ -42,9 +45,24 @@
       background-color: #cccccc;
       cursor: not-allowed;
     }
+    .search-container {
+      margin: 20px;
+    }
+    .search-container input {
+      padding: 10px;
+      width: 200px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
   </style>
 </head>
 <body>
+
+  <h1>Pemutar Video Dinamis</h1>
+
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Cari video..." />
+  </div>
 
   <div id="video-container" class="video-container"></div>
 
@@ -60,19 +78,21 @@
     const videosPerPage = 10;
     let currentPage = 1;
     let totalPages = 1;
+    let videoData = []; // Simpan semua video di sini
 
     // Mengambil data video dari file JSON eksternal
     fetch('https://raw.githubusercontent.com/andreyfranata/example-github/refs/heads/master/video.json')  
       .then(response => response.json())
       .then(data => {
-        totalPages = Math.ceil(data.length / videosPerPage);
-        displayVideos(data, currentPage);
+        videoData = data; // Simpan data video
+        totalPages = Math.ceil(videoData.length / videosPerPage);
+        displayVideos(videoData, currentPage);
 
         // Event listener untuk tombol "Selanjutnya"
         document.getElementById('nextButton').addEventListener('click', () => {
           if (currentPage < totalPages) {
             currentPage++;
-            displayVideos(data, currentPage);
+            displayVideos(videoData, currentPage);
           }
         });
 
@@ -80,8 +100,17 @@
         document.getElementById('prevButton').addEventListener('click', () => {
           if (currentPage > 1) {
             currentPage--;
-            displayVideos(data, currentPage);
+            displayVideos(videoData, currentPage);
           }
+        });
+
+        // Event listener untuk input pencarian
+        document.getElementById('searchInput').addEventListener('input', (event) => {
+          const searchTerm = event.target.value.toLowerCase();
+          const filteredVideos = videoData.filter(video => video.title.toLowerCase().includes(searchTerm));
+          currentPage = 1; // Reset ke halaman pertama saat mencari
+          totalPages = Math.ceil(filteredVideos.length / videosPerPage);
+          displayVideos(filteredVideos, currentPage);
         });
       })
       .catch(error => {
