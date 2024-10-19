@@ -24,12 +24,11 @@
       width: 100%;
       height: auto;
       background-color: black;
-      margin-bottom: 10px; /* Ruang antar player */
+      margin-bottom: 10px;
     }
     .title {
       margin-bottom: 10px;
       font-weight: bold;
-      position: relative;
     }
     .search-container {
       position: absolute;
@@ -43,21 +42,21 @@
       border: 1px solid #ccc;
       margin-top: 5px;
       width: 100%;
-      transition: opacity 0.3s ease, visibility 0.3s ease; /* Tambah transisi */
-      opacity: 0; /* Awalnya tersembunyi */
-      visibility: hidden; /* Awalnya tidak terlihat */
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      opacity: 0;
+      visibility: hidden;
     }
     .search-container.active input {
       display: block;
-      opacity: 1; /* Tampilkan input */
-      visibility: visible; /* Tampilkan input */
+      opacity: 1;
+      visibility: visible;
     }
     .search-container button {
       background: none;
       border: none;
       cursor: pointer;
       outline: none;
-      transition: opacity 0.3s; /* Tambah transisi */
+      transition: opacity 0.3s;
     }
     .search-container button:hover {
       opacity: 0.7;
@@ -113,12 +112,7 @@
     </div>
   </h1>
 
-  <div class="category-container" id="categoryContainer">
-    <div class="category-button" data-category="Kategori 1">Kategori 1</div>
-    <div class="category-button" data-category="Kategori 2">Kategori 2</div>
-    <div class="category-button" data-category="Kategori 3">Kategori 3</div>
-    <div class="category-button" data-category="Kategori 4">Kategori 4</div>
-  </div>
+  <div class="category-container" id="categoryContainer"></div>
 
   <div id="video-container" class="video-container"></div>
 
@@ -127,82 +121,100 @@
     <button id="nextButton">Selanjutnya</button>
   </div>
 
-  <!-- Pustaka HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
   <script>
     const videosPerPage = 10;
     let currentPage = 1;
     let totalPages = 1;
-    let videoData = []; // Simpan semua video di sini
+    let videoData = [];
 
     // Mengambil data video dari file JSON eksternal
     fetch('https://raw.githubusercontent.com/andreyfranata/example-github/refs/heads/master/video.json')  
       .then(response => response.json())
       .then(data => {
-        videoData = data; // Simpan data video
+        videoData = data;
         totalPages = Math.ceil(videoData.length / videosPerPage);
         displayVideos(videoData, currentPage);
-
-        // Event listener untuk tombol "Selanjutnya"
-        document.getElementById('nextButton').addEventListener('click', () => {
-          if (currentPage < totalPages) {
-            currentPage++;
-            displayVideos(videoData, currentPage);
-          }
-        });
-
-        // Event listener untuk tombol "Sebelumnya"
-        document.getElementById('prevButton').addEventListener('click', () => {
-          if (currentPage > 1) {
-            currentPage--;
-            displayVideos(videoData, currentPage);
-          }
-        });
-
-        // Event listener untuk tombol pencarian
-        document.getElementById('searchButton').addEventListener('click', () => {
-          const searchContainer = document.getElementById('searchContainer');
-          searchContainer.classList.toggle('active'); // Toggle kelas aktif
-          const searchInput = document.getElementById('searchInput');
-          searchInput.value = ''; // Kosongkan input saat toggle
-          if (searchContainer.classList.contains('active')) {
-            searchInput.focus(); // Fokus pada input saat tampil
-          }
-        });
-
-        // Event listener untuk input pencarian
-        document.getElementById('searchInput').addEventListener('input', (event) => {
-          const searchTerm = event.target.value.toLowerCase();
-          const filteredVideos = videoData.filter(video => video.title.toLowerCase().includes(searchTerm));
-          currentPage = 1; // Reset ke halaman pertama saat mencari
-          totalPages = Math.ceil(filteredVideos.length / videosPerPage);
-          displayVideos(filteredVideos, currentPage);
-        });
-
-        // Event listener untuk kategori
-        document.querySelectorAll('.category-button').forEach(button => {
-          button.addEventListener('click', () => {
-            // Toggle aktif pada kategori
-            button.classList.toggle('active');
-            const selectedCategory = button.classList.contains('active') ? button.dataset.category.toLowerCase() : null;
-
-            // Filter video berdasarkan kategori yang dipilih
-            const filteredVideos = selectedCategory ? videoData.filter(video => video.category && video.category.toLowerCase() === selectedCategory) : videoData;
-            currentPage = 1; // Reset ke halaman pertama saat memilih kategori
-            totalPages = Math.ceil(filteredVideos.length / videosPerPage);
-            displayVideos(filteredVideos, currentPage);
-          });
-        });
+        setupPagination();
+        setupSearch();
+        setupCategories();
       })
       .catch(error => {
         console.error('Gagal memuat daftar video:', error);
       });
 
-    // Fungsi untuk menampilkan video sesuai halaman
+    // Mengambil data kategori dari file JSON eksternal
+    fetch('https://raw.githubusercontent.com/andreyfranata/example-github/refs/heads/master/categories.json')
+      .then(response => response.json())
+      .then(data => {
+        const categories = data.categories; // Ambil kategori dari data
+        setupCategories(categories); // Panggil fungsi setupCategories dengan kategori
+      })
+      .catch(error => {
+        console.error('Gagal memuat daftar kategori:', error);
+      });
+
+    function setupPagination() {
+      document.getElementById('nextButton').addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          displayVideos(videoData, currentPage);
+        }
+      });
+
+      document.getElementById('prevButton').addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          displayVideos(videoData, currentPage);
+        }
+      });
+    }
+
+    function setupSearch() {
+      document.getElementById('searchButton').addEventListener('click', () => {
+        const searchContainer = document.getElementById('searchContainer');
+        searchContainer.classList.toggle('active');
+        const searchInput = document.getElementById('searchInput');
+        searchInput.value = '';
+        if (searchContainer.classList.contains('active')) {
+          searchInput.focus();
+        }
+      });
+
+      document.getElementById('searchInput').addEventListener('input', (event) => {
+        const searchTerm = event.target.value.toLowerCase();
+        const filteredVideos = videoData.filter(video => video.title.toLowerCase().includes(searchTerm));
+        currentPage = 1;
+        totalPages = Math.ceil(filteredVideos.length / videosPerPage);
+        displayVideos(filteredVideos, currentPage);
+      });
+    }
+
+    function setupCategories(categories) {
+      const categoryContainer = document.getElementById('categoryContainer');
+      categoryContainer.innerHTML = ''; // Kosongkan kontainer sebelum menambahkan kategori
+
+      categories.forEach(category => {
+        const button = document.createElement('div');
+        button.className = 'category-button';
+        button.textContent = category;
+        button.dataset.category = category.toLowerCase();
+        button.addEventListener('click', () => {
+          button.classList.toggle('active');
+          const selectedCategory = button.classList.contains('active') ? button.dataset.category : null;
+          const filteredVideos = selectedCategory ? videoData.filter(video => video.category && video.category.toLowerCase() === selectedCategory) : videoData;
+          currentPage = 1;
+          totalPages = Math.ceil(filteredVideos.length / videosPerPage);
+          displayVideos(filteredVideos, currentPage);
+        });
+        categoryContainer.appendChild(button);
+      });
+    }
+
     function displayVideos(videos, page) {
       const videoContainer = document.getElementById('video-container');
-      videoContainer.innerHTML = '';  // Hapus konten lama
+      videoContainer.innerHTML = '';
 
       const startIndex = (page - 1) * videosPerPage;
       const endIndex = startIndex + videosPerPage;
@@ -210,48 +222,35 @@
       const videosToDisplay = videos.slice(startIndex, endIndex);
       videosToDisplay.forEach(video => loadVideo(video));
 
-      // Update status tombol
       document.getElementById('prevButton').disabled = (page === 1 || videos.length === 0);
       document.getElementById('nextButton').disabled = (page === totalPages || videos.length === 0);
     }
 
-    // Fungsi untuk memuat video dan membuat player baru dengan judul
     function loadVideo(video) {
       const videoContainer = document.getElementById('video-container');
-
-      // Buat elemen video
       const videoElement = document.createElement('video');
-      videoElement.controls = true; // Menambahkan kontrol pemutar
+      videoElement.controls = true;
       videoContainer.appendChild(videoElement);
 
-      // Buat elemen judul
       const titleElement = document.createElement('div');
       titleElement.className = 'title';
       titleElement.textContent = video.title;
       videoContainer.appendChild(titleElement);
 
-      // Menggunakan CORS proxy
-      const corsProxy = 'https://cors-anywhere.herokuapp.com/';
-      const videoUrl = corsProxy + video.url; // Tambahkan CORS proxy di depan URL
-
       if (Hls.isSupported()) {
         const hls = new Hls();
-        hls.loadSource(videoUrl);
+        hls.loadSource(video.url);
         hls.attachMedia(videoElement);
-
-        // Pilih resolusi tertinggi
-        hls.on(Hls.Events.MANIFEST_PARSED, function() {
-          hls.startLevel = hls.levels.length - 1;  // Pilih level tertinggi
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          hls.startLevel = hls.levels.length - 1;
         });
-
-        // Error handling
-        hls.on(Hls.Events.ERROR, function(event, data) {
+        hls.on(Hls.Events.ERROR, (event, data) => {
           if (data.fatal) {
             console.error('Kesalahan HLS:', data);
           }
         });
       } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-        videoElement.src = videoUrl; // Set URL video untuk pemutaran
+        videoElement.src = video.url;
       } else {
         alert('Peramban Anda tidak mendukung streaming HLS.');
       }
