@@ -43,6 +43,7 @@
       border: 1px solid #ccc;
       margin-top: 5px;
       width: 100%;
+      transition: display 0.3s ease;
     }
     .search-container button {
       background: none;
@@ -74,8 +75,7 @@
       white-space: nowrap;
       margin: 10px 0;
       padding: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      background-color: rgba(255, 255, 255, 0.5); /* Transparan */
     }
     .category-button {
       display: inline-block;
@@ -104,12 +104,7 @@
     </div>
   </h1>
 
-  <div class="category-container" id="categoryContainer">
-    <div class="category-button" data-category="Kategori 1">Kategori 1</div>
-    <div class="category-button" data-category="Kategori 2">Kategori 2</div>
-    <div class="category-button" data-category="Kategori 3">Kategori 3</div>
-    <div class="category-button" data-category="Kategori 4">Kategori 4</div>
-  </div>
+  <div class="category-container" id="categoryContainer"></div>
 
   <div id="video-container" class="video-container"></div>
 
@@ -134,6 +129,7 @@
         videoData = data; // Simpan data video
         totalPages = Math.ceil(videoData.length / videosPerPage);
         displayVideos(videoData, currentPage);
+        generateCategories(videoData); // Generate kategori dari data video
 
         // Event listener untuk tombol "Selanjutnya"
         document.getElementById('nextButton').addEventListener('click', () => {
@@ -154,8 +150,12 @@
         // Event listener untuk tombol pencarian
         document.getElementById('searchButton').addEventListener('click', () => {
           const searchInput = document.getElementById('searchInput');
-          searchInput.style.display = searchInput.style.display === 'block' ? 'none' : 'block'; // Tampilkan atau sembunyikan input
-          searchInput.focus(); // Fokus pada input
+          if (searchInput.style.display === 'block') {
+            searchInput.style.display = 'none'; // Sembunyikan input
+          } else {
+            searchInput.style.display = 'block'; // Tampilkan input
+            searchInput.focus(); // Fokus pada input
+          }
         });
 
         // Event listener untuk input pencarian
@@ -166,25 +166,37 @@
           totalPages = Math.ceil(filteredVideos.length / videosPerPage);
           displayVideos(filteredVideos, currentPage);
         });
-
-        // Event listener untuk kategori
-        document.querySelectorAll('.category-button').forEach(button => {
-          button.addEventListener('click', () => {
-            // Toggle aktif pada kategori
-            button.classList.toggle('active');
-            const selectedCategory = button.classList.contains('active') ? button.dataset.category.toLowerCase() : null;
-
-            // Filter video berdasarkan kategori yang dipilih
-            const filteredVideos = selectedCategory ? videoData.filter(video => video.category && video.category.toLowerCase() === selectedCategory) : videoData;
-            currentPage = 1; // Reset ke halaman pertama saat memilih kategori
-            totalPages = Math.ceil(filteredVideos.length / videosPerPage);
-            displayVideos(filteredVideos, currentPage);
-          });
-        });
       })
       .catch(error => {
         console.error('Gagal memuat daftar video:', error);
       });
+
+    // Fungsi untuk menghasilkan kategori dari data video
+    function generateCategories(videos) {
+      const categoryContainer = document.getElementById('categoryContainer');
+      const categories = Array.from(new Set(videos.map(video => video.category))); // Ambil kategori unik
+
+      categories.forEach(category => {
+        const categoryButton = document.createElement('div');
+        categoryButton.className = 'category-button';
+        categoryButton.textContent = category;
+        categoryButton.dataset.category = category;
+
+        // Event listener untuk kategori
+        categoryButton.addEventListener('click', () => {
+          categoryButton.classList.toggle('active'); // Toggle aktif pada kategori
+          const selectedCategory = categoryButton.classList.contains('active') ? category : null;
+
+          // Filter video berdasarkan kategori yang dipilih
+          const filteredVideos = selectedCategory ? videoData.filter(video => video.category === selectedCategory) : videoData;
+          currentPage = 1; // Reset ke halaman pertama saat memilih kategori
+          totalPages = Math.ceil(filteredVideos.length / videosPerPage);
+          displayVideos(filteredVideos, currentPage);
+        });
+
+        categoryContainer.appendChild(categoryButton);
+      });
+    }
 
     // Fungsi untuk menampilkan video sesuai halaman
     function displayVideos(videos, page) {
@@ -237,9 +249,4 @@
         videoElement.src = video.url;
       } else {
         alert('Peramban Anda tidak mendukung streaming HLS.');
-      }
-    }
-  </script>
-
-</body>
-</html>
+        
