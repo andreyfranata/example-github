@@ -20,29 +20,11 @@
       width: 100%;
       height: auto;
       background-color: black;
-      margin-bottom: 10px;
+      margin-bottom: 10px; /* Ruang antar player */
     }
     .title {
       margin-bottom: 10px;
       font-weight: bold;
-    }
-    .pagination {
-      display: flex;
-      justify-content: center;
-      margin: 20px 0;
-    }
-    .pagination button {
-      margin: 0 5px;
-      padding: 10px 20px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .pagination button:disabled {
-      background-color: #ddd;
-      cursor: not-allowed;
     }
   </style>
 </head>
@@ -50,52 +32,21 @@
 
   <div id="video-container" class="video-container"></div>
 
-  <!-- Paginasi -->
-  <div class="pagination">
-    <button id="prevPage" onclick="changePage(-1)">Sebelumnya</button>
-    <span id="pageInfo"></span>
-    <button id="nextPage" onclick="changePage(1)">Selanjutnya</button>
-  </div>
-
   <!-- Pustaka HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
   <script>
-    const videosPerPage = 10;
-    let currentPage = 1;
-    let totalPages = 1;
-    let videoData = [];
-
     // Mengambil data video dari file JSON eksternal
-    fetch('https://raw.githubusercontent.com/andreyfranata/example-github/refs/heads/master/video.json')
+    fetch('https://raw.githubusercontent.com/andreyfranata/example-github/refs/heads/master/video.json')  
       .then(response => response.json())
       .then(data => {
-        videoData = data;
-        totalPages = Math.ceil(videoData.length / videosPerPage);
-        loadPage(currentPage);
+        data.forEach(video => {
+          loadVideo(video);  // Muat video dari JSON
+        });
       })
       .catch(error => {
         console.error('Gagal memuat daftar video:', error);
       });
-
-    // Memuat video untuk halaman tertentu
-    function loadPage(page) {
-      const videoContainer = document.getElementById('video-container');
-      videoContainer.innerHTML = ''; // Hapus video yang ada sebelumnya
-
-      const start = (page - 1) * videosPerPage;
-      const end = page * videosPerPage;
-      const videosToShow = videoData.slice(start, end);
-
-      videosToShow.forEach(video => {
-        loadVideo(video);
-      });
-
-      // Update informasi halaman
-      document.getElementById('pageInfo').textContent = `Halaman ${page} dari ${totalPages}`;
-      document.getElementById('prevPage').disabled = page === 1;
-      document.getElementById('nextPage').disabled = page === totalPages;
-    }
 
     // Fungsi untuk memuat video dan membuat player baru dengan judul
     function loadVideo(video) {
@@ -103,7 +54,7 @@
 
       // Buat elemen video
       const videoElement = document.createElement('video');
-      videoElement.controls = true;
+      videoElement.controls = true; // Menambahkan kontrol pemutar
       videoContainer.appendChild(videoElement);
 
       // Buat elemen judul
@@ -117,11 +68,13 @@
         hls.loadSource(video.url);
         hls.attachMedia(videoElement);
 
+        // Pilih resolusi tertinggi
         hls.on(Hls.Events.MANIFEST_PARSED, function() {
-          hls.startLevel = hls.levels.length - 1;
-          videoElement.play();
+          hls.startLevel = hls.levels.length - 1;  // Pilih level tertinggi
+          // Tidak perlu auto-play di sini
         });
 
+        // Error handling
         hls.on(Hls.Events.ERROR, function(event, data) {
           if (data.fatal) {
             console.error('Kesalahan HLS:', data);
@@ -129,16 +82,10 @@
         });
       } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
         videoElement.src = video.url;
-        videoElement.play();
+        // Tidak perlu auto-play di sini juga
       } else {
         alert('Peramban Anda tidak mendukung streaming HLS.');
       }
-    }
-
-    // Mengubah halaman
-    function changePage(direction) {
-      currentPage += direction;
-      loadPage(currentPage);
     }
   </script>
 
