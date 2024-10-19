@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Indonesia vs China</title>
-  <link rel="icon" href="Flag_of_Indonesia.svg.webp" type="image/webp"> <!-- Add this line for favicon -->
+  <title>Pemutar Video Dinamis</title>
+  <link rel="icon" href="Flag_of_Indonesia.svg.webp" type="image/webp">
 
   <style>
     body {
@@ -14,87 +14,132 @@
     }
     .video-container {
       max-width: 800px;
-      margin: 0 auto;
+      margin: 20px auto;
     }
     video {
       width: 100%;
       height: auto;
       background-color: black;
+      margin-bottom: 10px;
     }
-    .buttons {
-      margin-top: 20px;
-    }
-    .button {
-      padding: 10px 20px;
-      margin: 5px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    .button:hover {
-      background-color: #45a049;
-    }
-    .match-info {
-      margin-top: 20px;
-      font-size: 24px;
+    .title {
+      margin-bottom: 10px;
       font-weight: bold;
+    }
+    .pagination {
       display: flex;
       justify-content: center;
-      align-items: center;
+      margin: 20px 0;
     }
-    .flag {
-      width: 30px; /* Adjust the size of the flag */
-      margin: 0 8px; /* Space between the flag and text */
-      vertical-align: middle; /* Aligns the flag vertically with the text */
+    .pagination button {
+      margin: 0 5px;
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .pagination button:disabled {
+      background-color: #ddd;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
 
-  <div class="video-container">
-    <video id="live-stream" controls></video>
+  <div id="video-container" class="video-container"></div>
+
+  <!-- Paginasi -->
+  <div class="pagination">
+    <button id="prevPage" onclick="changePage(-1)">Sebelumnya</button>
+    <span id="pageInfo"></span>
+    <button id="nextPage" onclick="changePage(1)">Selanjutnya</button>
   </div>
 
-  <div class="match-info">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Flag_of_Indonesia.svg/1280px-Flag_of_Indonesia.svg.png" alt="Indonesia Flag" class="flag">
-    INDONESIA VS CHINA
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/450px-Flag_of_the_People%27s_Republic_of_China.svg.png" alt="China Flag" class="flag">
-  </div>
-
-  <div class="buttons">
-    <button class="button" onclick="changeVideo('https://bf.shandongjnkt.com/live/322580_hd01.m3u8?txSecret=df1036aacfef2c95a5c1e72e6438bdd8&txTime=670e57bf')">CH 01</button>
-    <button class="button" onclick="changeVideo('https://bf.shandongjnkt.com/live/322656_hd01.m3u8?txSecret=5d968dec535603c6981bea09587b11ac&txTime=670e57b0')">CH 02</button>
-    <button class="button" onclick="changeVideo('https://bf.shandongjnkt.com/live/322692_hd01.m3u8?txSecret=d6db312e848efee42c5b959531a9b64d&txTime=670e5815')">CH 03</button>
-    <button class="button" onclick="window.open('https://whatsapp.com/channel/0029VaFZA3WKAwElEnu3yJ0X', '_blank')">Join WhatsApp Channel</button>
-  
-  </div>
-
-  <!-- HLS.js Library -->
+  <!-- Pustaka HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
   <script>
-    var video = document.getElementById('live-stream');
+    const videosPerPage = 10;
+    let currentPage = 1;
+    let totalPages = 1;
+    let videoData = [];
 
-    function changeVideo(source) {
+    // Mengambil data video dari file JSON eksternal
+    fetch('https://raw.githubusercontent.com/andreyfranata/example-github/refs/heads/master/video.json')
+      .then(response => response.json())
+      .then(data => {
+        videoData = data;
+        totalPages = Math.ceil(videoData.length / videosPerPage);
+        loadPage(currentPage);
+      })
+      .catch(error => {
+        console.error('Gagal memuat daftar video:', error);
+      });
+
+    // Memuat video untuk halaman tertentu
+    function loadPage(page) {
+      const videoContainer = document.getElementById('video-container');
+      videoContainer.innerHTML = ''; // Hapus video yang ada sebelumnya
+
+      const start = (page - 1) * videosPerPage;
+      const end = page * videosPerPage;
+      const videosToShow = videoData.slice(start, end);
+
+      videosToShow.forEach(video => {
+        loadVideo(video);
+      });
+
+      // Update informasi halaman
+      document.getElementById('pageInfo').textContent = `Halaman ${page} dari ${totalPages}`;
+      document.getElementById('prevPage').disabled = page === 1;
+      document.getElementById('nextPage').disabled = page === totalPages;
+    }
+
+    // Fungsi untuk memuat video dan membuat player baru dengan judul
+    function loadVideo(video) {
+      const videoContainer = document.getElementById('video-container');
+
+      // Buat elemen video
+      const videoElement = document.createElement('video');
+      videoElement.controls = true;
+      videoContainer.appendChild(videoElement);
+
+      // Buat elemen judul
+      const titleElement = document.createElement('div');
+      titleElement.className = 'title';
+      titleElement.textContent = video.title;
+      videoContainer.appendChild(titleElement);
+
       if (Hls.isSupported()) {
-        var hls = new Hls();
-        hls.loadSource(source);
-        hls.attachMedia(video);
+        const hls = new Hls();
+        hls.loadSource(video.url);
+        hls.attachMedia(videoElement);
+
         hls.on(Hls.Events.MANIFEST_PARSED, function() {
-          video.play();
+          hls.startLevel = hls.levels.length - 1;
+          videoElement.play();
         });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = source;
-        video.play();
+
+        hls.on(Hls.Events.ERROR, function(event, data) {
+          if (data.fatal) {
+            console.error('Kesalahan HLS:', data);
+          }
+        });
+      } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+        videoElement.src = video.url;
+        videoElement.play();
       } else {
-        alert('Your browser does not support HLS streaming.');
+        alert('Peramban Anda tidak mendukung streaming HLS.');
       }
     }
 
-    // Default to CH 01
-    changeVideo('https://bf.shandongjnkt.com/live/322580_hd01.m3u8?txSecret=df1036aacfef2c95a5c1e72e6438bdd8&txTime=670e57bf');
+    // Mengubah halaman
+    function changePage(direction) {
+      currentPage += direction;
+      loadPage(currentPage);
+    }
   </script>
 
 </body>
