@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IMAGINATION, hot, sexy and beauty</title>
+  <title>Pemutar Video Dinamis</title>
   <link rel="icon" href="Flag_of_Indonesia.svg.webp" type="image/webp">
 
   <style>
@@ -46,21 +46,44 @@
       cursor: not-allowed;
     }
     .search-container {
+      position: relative;
+      display: inline-block;
       margin: 20px;
     }
     .search-container input {
+      width: 0;
+      opacity: 0;
       padding: 10px;
-      width: 200px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      transition: width 0.5s, opacity 0.5s;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+    .search-container button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      outline: none;
+    }
+    .search-container button:hover {
+      opacity: 0.7;
+    }
+    .search-container.active input {
+      width: 200px;
+      opacity: 1;
     }
   </style>
 </head>
 <body>
 
-  <h1>IMAGINATION</h1>
+  <h1>Pemutar Video Dinamis</h1>
 
-  <div class="search-container">
+  <div class="search-container" id="searchContainer">
+    <button id="searchButton">
+      <img src="https://img.icons8.com/ios-filled/20/000000/search.png" alt="Search Icon" />
+    </button>
     <input type="text" id="searchInput" placeholder="Cari video..." />
   </div>
 
@@ -101,6 +124,19 @@
           if (currentPage > 1) {
             currentPage--;
             displayVideos(videoData, currentPage);
+          }
+        });
+
+        // Event listener untuk tombol pencarian
+        document.getElementById('searchButton').addEventListener('click', () => {
+          const searchContainer = document.getElementById('searchContainer');
+          searchContainer.classList.toggle('active'); // Menambahkan/ menghapus kelas aktif
+          const searchInput = document.getElementById('searchInput');
+          if (searchContainer.classList.contains('active')) {
+            searchInput.focus();
+          } else {
+            searchInput.value = ''; // Kosongkan input jika ditutup
+            displayVideos(videoData, currentPage); // Tampilkan semua video
           }
         });
 
