@@ -29,6 +29,7 @@
     .title {
       margin-bottom: 10px;
       font-weight: bold;
+      position: relative;
     }
     .search-container {
       position: absolute;
@@ -99,10 +100,6 @@
       background-color: #007BFF;
       color: white;
     }
-    .error-message {
-      color: red;
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
@@ -116,7 +113,12 @@
     </div>
   </h1>
 
-  <div class="category-container" id="categoryContainer"></div>
+  <div class="category-container" id="categoryContainer">
+    <div class="category-button" data-category="Kategori 1">Kategori 1</div>
+    <div class="category-button" data-category="Kategori 2">Kategori 2</div>
+    <div class="category-button" data-category="Kategori 3">Kategori 3</div>
+    <div class="category-button" data-category="Kategori 4">Kategori 4</div>
+  </div>
 
   <div id="video-container" class="video-container"></div>
 
@@ -131,90 +133,60 @@
     const videosPerPage = 10;
     let currentPage = 1;
     let totalPages = 1;
-    let videoData = [];
+    let videoData = [
+      {
+        title: "Video MP4 Contoh",
+        url: "https://cdn77-vid-mp4.xvideos-cdn.com/cH7ereANZUUhHvjsOiEUKw==,1729365583/videos/mp4/d/7/1/xvideos.com_d71ec46528f78877b84af1e81a91edd9.mp4?ui=MjMuMjM2LjEwNS40My0tL3ZpZGVvLnVlbG9kYnZiY2I5L29oX215X2xpdHRs"
+      }
+      // Tambahkan video lain di sini
+    ];
 
-    // Mengambil data video dari file JSON eksternal
-    fetch('https://raw.githubusercontent.com/andreyfranata/example-github/refs/heads/master/video.json')  
-      .then(response => response.json())
-      .then(data => {
-        videoData = data;
-        totalPages = Math.ceil(videoData.length / videosPerPage);
+    totalPages = Math.ceil(videoData.length / videosPerPage);
+    displayVideos(videoData, currentPage);
+
+    document.getElementById('nextButton').addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
         displayVideos(videoData, currentPage);
-        setupPagination();
-        setupSearch();
-        setupCategories();
-      })
-      .catch(error => {
-        console.error('Gagal memuat daftar video:', error);
-      });
+      }
+    });
 
-    // Mengambil data kategori dari file JSON eksternal
-    fetch('https://raw.githubusercontent.com/andreyfranata/example-github/refs/heads/master/categories.json')
-      .then(response => response.json())
-      .then(data => {
-        const categories = data.categories; // Ambil kategori dari data
-        setupCategories(categories); // Panggil fungsi setupCategories dengan kategori
-      })
-      .catch(error => {
-        console.error('Gagal memuat daftar kategori:', error);
-      });
+    document.getElementById('prevButton').addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        displayVideos(videoData, currentPage);
+      }
+    });
 
-    function setupPagination() {
-      document.getElementById('nextButton').addEventListener('click', () => {
-        if (currentPage < totalPages) {
-          currentPage++;
-          displayVideos(videoData, currentPage);
-        }
-      });
+    document.getElementById('searchButton').addEventListener('click', () => {
+      const searchContainer = document.getElementById('searchContainer');
+      searchContainer.classList.toggle('active');
+      const searchInput = document.getElementById('searchInput');
+      searchInput.value = '';
+      if (searchContainer.classList.contains('active')) {
+        searchInput.focus();
+      }
+    });
 
-      document.getElementById('prevButton').addEventListener('click', () => {
-        if (currentPage > 1) {
-          currentPage--;
-          displayVideos(videoData, currentPage);
-        }
-      });
-    }
+    document.getElementById('searchInput').addEventListener('input', (event) => {
+      const searchTerm = event.target.value.toLowerCase();
+      const filteredVideos = videoData.filter(video => video.title.toLowerCase().includes(searchTerm));
+      currentPage = 1;
+      totalPages = Math.ceil(filteredVideos.length / videosPerPage);
+      displayVideos(filteredVideos, currentPage);
+    });
 
-    function setupSearch() {
-      document.getElementById('searchButton').addEventListener('click', () => {
-        const searchContainer = document.getElementById('searchContainer');
-        searchContainer.classList.toggle('active');
-        const searchInput = document.getElementById('searchInput');
-        searchInput.value = '';
-        if (searchContainer.classList.contains('active')) {
-          searchInput.focus();
-        }
-      });
+    document.querySelectorAll('.category-button').forEach(button => {
+      button.addEventListener('click', () => {
+        button.classList.toggle('active');
+        const selectedCategory = button.classList.contains('active') ? button.dataset.category.toLowerCase() : null;
 
-      document.getElementById('searchInput').addEventListener('input', (event) => {
-        const searchTerm = event.target.value.toLowerCase();
-        const filteredVideos = videoData.filter(video => video.title.toLowerCase().includes(searchTerm));
+        const filteredVideos = selectedCategory ? videoData.filter(video => video.category && video.category.toLowerCase() === selectedCategory) : videoData;
         currentPage = 1;
         totalPages = Math.ceil(filteredVideos.length / videosPerPage);
         displayVideos(filteredVideos, currentPage);
       });
-    }
-
-    function setupCategories(categories) {
-      const categoryContainer = document.getElementById('categoryContainer');
-      categoryContainer.innerHTML = ''; // Kosongkan kontainer sebelum menambahkan kategori
-
-      categories.forEach(category => {
-        const button = document.createElement('div');
-        button.className = 'category-button';
-        button.textContent = category;
-        button.dataset.category = category.toLowerCase();
-        button.addEventListener('click', () => {
-          button.classList.toggle('active');
-          const selectedCategory = button.classList.contains('active') ? button.dataset.category : null;
-          const filteredVideos = selectedCategory ? videoData.filter(video => video.category && video.category.toLowerCase() === selectedCategory) : videoData;
-          currentPage = 1;
-          totalPages = Math.ceil(filteredVideos.length / videosPerPage);
-          displayVideos(filteredVideos, currentPage);
-        });
-        categoryContainer.appendChild(button);
-      });
-    }
+    });
 
     function displayVideos(videos, page) {
       const videoContainer = document.getElementById('video-container');
@@ -232,6 +204,7 @@
 
     function loadVideo(video) {
       const videoContainer = document.getElementById('video-container');
+
       const videoElement = document.createElement('video');
       videoElement.controls = true;
       videoContainer.appendChild(videoElement);
@@ -241,45 +214,9 @@
       titleElement.textContent = video.title;
       videoContainer.appendChild(titleElement);
 
-      // Memastikan URL video valid
-      if (video.url && isValidUrl(video.url)) {
-        if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(video.url);
-          hls.attachMedia(videoElement);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            hls.startLevel = hls.levels.length - 1; // Memulai pada kualitas terbaik
-          });
-          hls.on(Hls.Events.ERROR, (event, data) => {
-            if (data.fatal) {
-              console.error('Kesalahan HLS:', data);
-              displayErrorMessage(videoContainer, 'Video tidak dapat diputar.'); // Menampilkan pesan kesalahan
-            }
-          });
-        } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-          videoElement.src = video.url;
-        } else {
-          displayErrorMessage(videoContainer, 'Peramban Anda tidak mendukung streaming HLS.'); // Menampilkan pesan kesalahan
-        }
-      } else {
-        displayErrorMessage(videoContainer, 'URL video tidak valid.'); // Menampilkan pesan kesalahan
-      }
-    }
-
-    function displayErrorMessage(container, message) {
-      const errorMessage = document.createElement('div');
-      errorMessage.className = 'error-message';
-      errorMessage.textContent = message;
-      container.appendChild(errorMessage);
-    }
-
-    function isValidUrl(string) {
-      try {
-        new URL(string);
-        return true;
-      } catch (_) {
-        return false;  
-      }
+      // Set source video
+      videoElement.src = video.url; // Set URL langsung tanpa memeriksa ekstensi
+      videoElement.play(); // Memulai pemutaran
     }
   </script>
 
