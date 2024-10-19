@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pemutar Video Dinamis</title>
+  <title>Kubil</title>
   <link rel="icon" href="Flag_of_Indonesia.svg.webp" type="image/webp">
 
   <style>
@@ -69,11 +69,28 @@
       background-color: #cccccc;
       cursor: not-allowed;
     }
+    .category-container {
+      margin: 10px 0;
+    }
+    .category-button {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #e0e0e0;
+      color: black;
+      border-radius: 5px;
+      margin: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .category-button.active {
+      background-color: #007BFF;
+      color: white;
+    }
   </style>
 </head>
 <body>
 
-  <h1>kubik
+  <h1>Kubil
     <div class="search-container" id="searchContainer">
       <button id="searchButton">
         <img src="https://img.icons8.com/ios-filled/20/000000/search.png" alt="Search Icon" />
@@ -81,6 +98,13 @@
       <input type="text" id="searchInput" placeholder="Cari video..." />
     </div>
   </h1>
+
+  <div class="category-container" id="categoryContainer">
+    <div class="category-button" data-category="Kategori 1">Kategori 1</div>
+    <div class="category-button" data-category="Kategori 2">Kategori 2</div>
+    <div class="category-button" data-category="Kategori 3">Kategori 3</div>
+    <div class="category-button" data-category="Kategori 4">Kategori 4</div>
+  </div>
 
   <div id="video-container" class="video-container"></div>
 
@@ -136,6 +160,21 @@
           currentPage = 1; // Reset ke halaman pertama saat mencari
           totalPages = Math.ceil(filteredVideos.length / videosPerPage);
           displayVideos(filteredVideos, currentPage);
+        });
+
+        // Event listener untuk kategori
+        document.querySelectorAll('.category-button').forEach(button => {
+          button.addEventListener('click', () => {
+            document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active')); // Hapus aktif dari semua kategori
+            button.classList.add('active'); // Tambahkan aktif pada kategori yang dipilih
+            
+            // Filter video berdasarkan kategori yang dipilih
+            const selectedCategory = button.dataset.category.toLowerCase();
+            const filteredVideos = videoData.filter(video => video.category && video.category.toLowerCase() === selectedCategory);
+            currentPage = 1; // Reset ke halaman pertama saat memilih kategori
+            totalPages = Math.ceil(filteredVideos.length / videosPerPage);
+            displayVideos(filteredVideos, currentPage);
+          });
         });
       })
       .catch(error => {
