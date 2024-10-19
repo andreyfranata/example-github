@@ -14,6 +14,7 @@
     }
     h1 {
       margin-top: 20px;
+      position: relative;
     }
     .video-container {
       max-width: 800px;
@@ -28,6 +29,29 @@
     .title {
       margin-bottom: 10px;
       font-weight: bold;
+      position: relative;
+    }
+    .search-container {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+    .search-container input {
+      display: none;
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+      width: 100%;
+    }
+    .search-container button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      outline: none;
+    }
+    .search-container button:hover {
+      opacity: 0.7;
     }
     .pagination {
       margin-top: 20px;
@@ -45,44 +69,18 @@
       background-color: #cccccc;
       cursor: not-allowed;
     }
-    .search-container {
-      position: relative;
-      display: inline-block;
-      margin: 20px;
-    }
-    .search-container input {
-      display: none;
-      width: 100%;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      transition: display 0.5s;
-    }
-    .search-container button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      outline: none;
-      position: absolute;
-      right: 0;
-      top: 0;
-      margin-top: 10px;
-    }
-    .search-container.active input {
-      display: inline-block;
-    }
   </style>
 </head>
 <body>
 
-  <h1>Pemutar Video Dinamis</h1>
-
-  <div class="search-container" id="searchContainer">
-    <button id="searchButton">
-      <img src="https://img.icons8.com/ios-filled/20/000000/search.png" alt="Search Icon" />
-    </button>
-    <input type="text" id="searchInput" placeholder="Cari video..." />
-  </div>
+  <h1>Pemutar Video Dinamis
+    <div class="search-container" id="searchContainer">
+      <button id="searchButton">
+        <img src="https://img.icons8.com/ios-filled/20/000000/search.png" alt="Search Icon" />
+      </button>
+      <input type="text" id="searchInput" placeholder="Cari video..." />
+    </div>
+  </h1>
 
   <div id="video-container" class="video-container"></div>
 
@@ -126,15 +124,9 @@
 
         // Event listener untuk tombol pencarian
         document.getElementById('searchButton').addEventListener('click', () => {
-          const searchContainer = document.getElementById('searchContainer');
-          searchContainer.classList.toggle('active'); // Menambahkan/ menghapus kelas aktif
           const searchInput = document.getElementById('searchInput');
-          if (searchContainer.classList.contains('active')) {
-            searchInput.focus();
-          } else {
-            searchInput.value = ''; // Kosongkan input jika ditutup
-            displayVideos(videoData, currentPage); // Tampilkan semua video
-          }
+          searchInput.style.display = searchInput.style.display === 'block' ? 'none' : 'block'; // Tampilkan atau sembunyikan input
+          searchInput.focus(); // Fokus pada input
         });
 
         // Event listener untuk input pencarian
