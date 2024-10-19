@@ -70,7 +70,12 @@
       cursor: not-allowed;
     }
     .category-container {
+      overflow-x: auto;
+      white-space: nowrap;
       margin: 10px 0;
+      padding: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
     .category-button {
       display: inline-block;
@@ -165,12 +170,12 @@
         // Event listener untuk kategori
         document.querySelectorAll('.category-button').forEach(button => {
           button.addEventListener('click', () => {
-            document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active')); // Hapus aktif dari semua kategori
-            button.classList.add('active'); // Tambahkan aktif pada kategori yang dipilih
-            
+            // Toggle aktif pada kategori
+            button.classList.toggle('active');
+            const selectedCategory = button.classList.contains('active') ? button.dataset.category.toLowerCase() : null;
+
             // Filter video berdasarkan kategori yang dipilih
-            const selectedCategory = button.dataset.category.toLowerCase();
-            const filteredVideos = videoData.filter(video => video.category && video.category.toLowerCase() === selectedCategory);
+            const filteredVideos = selectedCategory ? videoData.filter(video => video.category && video.category.toLowerCase() === selectedCategory) : videoData;
             currentPage = 1; // Reset ke halaman pertama saat memilih kategori
             totalPages = Math.ceil(filteredVideos.length / videosPerPage);
             displayVideos(filteredVideos, currentPage);
@@ -193,8 +198,8 @@
       videosToDisplay.forEach(video => loadVideo(video));
 
       // Update status tombol
-      document.getElementById('prevButton').disabled = (page === 1);
-      document.getElementById('nextButton').disabled = (page === totalPages);
+      document.getElementById('prevButton').disabled = (page === 1 || videos.length === 0);
+      document.getElementById('nextButton').disabled = (page === totalPages || videos.length === 0);
     }
 
     // Fungsi untuk memuat video dan membuat player baru dengan judul
