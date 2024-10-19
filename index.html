@@ -51,34 +51,31 @@
       margin: 20px;
     }
     .search-container input {
-      width: 0;
-      opacity: 0;
+      display: none;
+      width: 100%;
       padding: 10px;
       border-radius: 5px;
       border: 1px solid #ccc;
-      transition: width 0.5s, opacity 0.5s;
-      position: absolute;
-      right: 0;
-      top: 0;
+      transition: display 0.5s;
     }
     .search-container button {
       background: none;
       border: none;
       cursor: pointer;
       outline: none;
-    }
-    .search-container button:hover {
-      opacity: 0.7;
+      position: absolute;
+      right: 0;
+      top: 0;
+      margin-top: 10px;
     }
     .search-container.active input {
-      width: 200px;
-      opacity: 1;
+      display: inline-block;
     }
   </style>
 </head>
 <body>
 
-  <h1>kubik</h1>
+  <h1>Pemutar Video Dinamis</h1>
 
   <div class="search-container" id="searchContainer">
     <button id="searchButton">
