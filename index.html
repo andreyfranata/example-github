@@ -43,12 +43,21 @@
       border: 1px solid #ccc;
       margin-top: 5px;
       width: 100%;
+      transition: opacity 0.3s ease, visibility 0.3s ease; /* Tambah transisi */
+      opacity: 0; /* Awalnya tersembunyi */
+      visibility: hidden; /* Awalnya tidak terlihat */
+    }
+    .search-container.active input {
+      display: block;
+      opacity: 1; /* Tampilkan input */
+      visibility: visible; /* Tampilkan input */
     }
     .search-container button {
       background: none;
       border: none;
       cursor: pointer;
       outline: none;
+      transition: opacity 0.3s; /* Tambah transisi */
     }
     .search-container button:hover {
       opacity: 0.7;
@@ -153,9 +162,13 @@
 
         // Event listener untuk tombol pencarian
         document.getElementById('searchButton').addEventListener('click', () => {
+          const searchContainer = document.getElementById('searchContainer');
+          searchContainer.classList.toggle('active'); // Toggle kelas aktif
           const searchInput = document.getElementById('searchInput');
-          searchInput.style.display = searchInput.style.display === 'block' ? 'none' : 'block'; // Tampilkan atau sembunyikan input
-          searchInput.focus(); // Fokus pada input
+          searchInput.value = ''; // Kosongkan input saat toggle
+          if (searchContainer.classList.contains('active')) {
+            searchInput.focus(); // Fokus pada input saat tampil
+          }
         });
 
         // Event listener untuk input pencarian
