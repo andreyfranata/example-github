@@ -99,6 +99,10 @@
       background-color: #007BFF;
       color: white;
     }
+    .error-message {
+      color: red;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -237,22 +241,44 @@
       titleElement.textContent = video.title;
       videoContainer.appendChild(titleElement);
 
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(video.url);
-        hls.attachMedia(videoElement);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          hls.startLevel = hls.levels.length - 1;
-        });
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          if (data.fatal) {
-            console.error('Kesalahan HLS:', data);
-          }
-        });
-      } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-        videoElement.src = video.url;
+      // Memastikan URL video valid
+      if (video.url && isValidUrl(video.url)) {
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(video.url);
+          hls.attachMedia(videoElement);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            hls.startLevel = hls.levels.length - 1; // Memulai pada kualitas terbaik
+          });
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+              console.error('Kesalahan HLS:', data);
+              displayErrorMessage(videoContainer, 'Video tidak dapat diputar.'); // Menampilkan pesan kesalahan
+            }
+          });
+        } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+          videoElement.src = video.url;
+        } else {
+          displayErrorMessage(videoContainer, 'Peramban Anda tidak mendukung streaming HLS.'); // Menampilkan pesan kesalahan
+        }
       } else {
-        alert('Peramban Anda tidak mendukung streaming HLS.');
+        displayErrorMessage(videoContainer, 'URL video tidak valid.'); // Menampilkan pesan kesalahan
+      }
+    }
+
+    function displayErrorMessage(container, message) {
+      const errorMessage = document.createElement('div');
+      errorMessage.className = 'error-message';
+      errorMessage.textContent = message;
+      container.appendChild(errorMessage);
+    }
+
+    function isValidUrl(string) {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;  
       }
     }
   </script>
